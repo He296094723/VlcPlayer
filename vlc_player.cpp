@@ -14,7 +14,7 @@ public:
 
     void setOutputWindow(void* pHwnd);
     void setEventHandler(VLCEventHandler event, void* pUserData);
-    void openMedia(const char* pMediaPathName);
+    void openMedia(const char* pMediaPathName, bool localFile = true);
     void play();
     void pause();
     void stop();
@@ -80,9 +80,13 @@ void VlcPlayerPrivate ::setEventHandler(VLCEventHandler event, void* pUserData)
 }
 
 // 加载一个新项
-void VlcPlayerPrivate ::openMedia(const char* pMediaPathName)
+void VlcPlayerPrivate ::openMedia(const char* pMediaPathName, bool localFile)
 {
-    m_pMedia = libvlc_media_new_path(m_pVlcInstance, pMediaPathName);
+    if (localFile)
+        m_pMedia = libvlc_media_new_path(m_pVlcInstance, pMediaPathName);
+    else
+        m_pMedia = libvlc_media_new_location(m_pVlcInstance, pMediaPathName);
+
     libvlc_media_player_set_media(m_pMediaPlayer, m_pMedia);
 }
 
@@ -230,9 +234,9 @@ void VlcPlayer::setVolume(int volume)
     d_ptr->setVolume(volume);
 }
 
-void VlcPlayer::openMedia(const char* pMediaPathName)
+void VlcPlayer::openMedia(const char* pMediaPathName, bool localFile)
 {
-    d_ptr->openMedia(pMediaPathName);
+    d_ptr->openMedia(pMediaPathName, localFile);
 }
 
 void VlcPlayer::updatePosition()

@@ -11,10 +11,10 @@ LIBS += $$PWD/../vlc-3.0.2/sdk/lib/libvlc.lib \
 
 HEADERS += \
         vlc_player.h \
-        vlc_widget.h
+    main_window.h
 
 SOURCES += \
         main.cpp \
         vlc_player.cpp \
-        vlc_widget.cpp \
+    main_window.cpp
 

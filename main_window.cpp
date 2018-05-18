@@ -1,35 +1,60 @@
-﻿#include "vlc_widget.h"
+﻿#include "main_window.h"
 #include <QGroupBox>
+#include <QLabel>
 #include <QPushButton>
 #include <QSlider>
-#include <QLabel>
+#include <QMenuBar>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QTime>
 #include <QGridLayout>
 #include <QtDebug>
 
-VlcWidget::VlcWidget(QWidget *parent)
-    : QWidget(parent),
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent),
       m_length(0),
       m_lastVolume(80)
 {
     resize(600, 400);
 
-    initUI();
+    initMenuBar();
+    initCentralWidget();
     initSettings();
 
-    connect(&m_vlcPlayer, SIGNAL(timeChanged(int,int)), this, SLOT(onTimeChanged(int,int)));
+    connect(&m_vlcPlayer, SIGNAL(timeChanged(int, int)), this, SLOT(onTimeChanged(int, int)));
 }
 
-VlcWidget::~VlcWidget()
+MainWindow::~MainWindow()
 {
 
 }
 
-void VlcWidget::initUI()
+void MainWindow::initMenuBar()
+{
+    QMenuBar *menuBar = new QMenuBar(this);
+    QMenu *openMenu = new QMenu(menuBar);
+    QAction *localAction = new QAction();
+    QAction *networkAction = new QAction();
+
+    openMenu->setTitle(QStringLiteral("打开"));
+    localAction->setText(QStringLiteral("本地文件"));
+    networkAction->setText(QStringLiteral("网络资源"));
+
+    menuBar->addMenu(openMenu);
+    openMenu->addAction(localAction);
+    openMenu->addAction(networkAction);
+
+    setMenuBar(menuBar);
+
+    connect(localAction, SIGNAL(triggered(bool)), this, SLOT(onLocalFileTriggered()));
+    connect(networkAction, SIGNAL(triggered(bool)), this, SLOT(onNetworkTriggered()));
+}
+
+void MainWindow::initCentralWidget()
 {
     // 创建部件
-    m_pControlGroup = new QGroupBox(this);
+    QWidget *centralWidget = new QWidget(this);
+    QGroupBox *controlGroup = new QGroupBox(this);
     m_pPathLabel = new QLabel(this);
     m_pVlcControlLabel = new QLabel(this);
     m_pVolumeLevelLabel = new QLabel(this);
@@ -38,9 +63,16 @@ void VlcWidget::initUI()
     m_pPauseButton = new QPushButton(this);
     m_pStopButton = new QPushButton(this);
     m_pMuteButton = new QPushButton(this);
-    m_pOpenButton = new QPushButton(this);
     m_pVolumeSlider = new QSlider(this);
     m_pMediaSlider = new QSlider(this);
+
+    m_pPathLabel->setText(("VLC Player"));
+    controlGroup->setTitle(QStringLiteral("多媒体控制"));
+    m_pPlayButton->setText(QStringLiteral("播放"));
+    m_pPauseButton->setText(QStringLiteral("暂停"));
+    m_pStopButton->setText(QStringLiteral("停止"));
+    m_pMuteButton->setText(QStringLiteral("静音"));
+    m_pVolumeSlider->setToolTip(QStringLiteral("调节音量"));
 
     // 界面布局
     QHBoxLayout *hLayout = new QHBoxLayout();
@@ -51,26 +83,27 @@ void VlcWidget::initUI()
     hLayout->setContentsMargins(0, 0, 0, 0);
 
     QGridLayout *gridLayout = new QGridLayout();
-    gridLayout->addLayout(hLayout, 0, 0, 1, 8);
-    gridLayout->addWidget(m_pMediaSlider, 1, 0, 1, 8);
-    gridLayout->addWidget(m_pOpenButton, 2, 0);
-    gridLayout->addWidget(m_pPlayButton, 2, 1);
-    gridLayout->addWidget(m_pPauseButton, 2, 2);
-    gridLayout->addWidget(m_pStopButton, 2, 3);
-    gridLayout->addWidget(m_pMuteButton, 2, 5);
-    gridLayout->addWidget(m_pVolumeSlider, 2, 6);
-    gridLayout->addWidget(m_pVolumeLevelLabel, 2, 7);
-    gridLayout->setColumnStretch(4, 1000);
+    gridLayout->addLayout(hLayout, 0, 0, 1, 7);
+    gridLayout->addWidget(m_pMediaSlider, 1, 0, 1, 7);
+    gridLayout->addWidget(m_pPlayButton, 2, 0);
+    gridLayout->addWidget(m_pPauseButton, 2, 1);
+    gridLayout->addWidget(m_pStopButton, 2, 2);
+    gridLayout->addWidget(m_pMuteButton, 2, 4);
+    gridLayout->addWidget(m_pVolumeSlider, 2, 5);
+    gridLayout->addWidget(m_pVolumeLevelLabel, 2, 6);
+    gridLayout->setColumnStretch(3, 1000);
     gridLayout->setSpacing(10);
     gridLayout->setContentsMargins(10, 10, 10, 10);
-    m_pControlGroup->setLayout(gridLayout);
+    controlGroup->setLayout(gridLayout);
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->addWidget(m_pVlcControlLabel);
-    mainLayout->addWidget(m_pControlGroup);
+    mainLayout->addWidget(controlGroup);
     mainLayout->setSpacing(10);
     mainLayout->setContentsMargins(10, 10, 10, 10);
-    setLayout(mainLayout);
+    centralWidget->setLayout(mainLayout);
+
+    setCentralWidget(centralWidget);
 
     m_pVlcControlLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_pPathLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -82,40 +115,30 @@ void VlcWidget::initUI()
     connect(m_pPauseButton, SIGNAL(clicked()), this, SLOT(onPauseBtnClicked()));
     connect(m_pStopButton, SIGNAL(clicked()), this, SLOT(onStopBtnClicked()));
     connect(m_pMuteButton, SIGNAL(clicked()), this, SLOT(onMuteBtnClicked()));
-    connect(m_pOpenButton, SIGNAL(clicked()), this, SLOT(onLoadBtnClicked()));
     connect(m_pVolumeSlider, SIGNAL(valueChanged(int)), this, SLOT(onVolumeChanged(int)));
     connect(m_pVolumeSlider, SIGNAL(sliderReleased()), this, SLOT(onVolumeSliderReleased()));
     connect(m_pMediaSlider, SIGNAL(sliderReleased()), this, SLOT(onMediaChanged()));
 }
 
-void VlcWidget::initSettings()
+void MainWindow::initSettings()
 {
-    m_pPathLabel->setText(("VLC Player"));
-    m_pControlGroup->setTitle(QStringLiteral("多媒体控制"));
-    m_pOpenButton->setText(QStringLiteral("打开"));
-    m_pPlayButton->setText(QStringLiteral("播放"));
-    m_pPauseButton->setText(QStringLiteral("暂停"));
-    m_pStopButton->setText(QStringLiteral("停止"));
-    m_pMuteButton->setText(QStringLiteral("静音"));
-    m_pVolumeSlider->setToolTip(QStringLiteral("调节音量"));
-
     m_pVolumeSlider->setRange(0, 100);
     m_pMediaSlider->setRange(0, 100);
     m_pMediaPositionLabel->setText("00:00:00/00:00:00");
 
     m_vlcPlayer.setOutputWindow((void*)(m_pVlcControlLabel->winId()));
-    //m_vlcPlayer.setEventHandler(&handleVLCEvents, this);
 
     m_vlcPlayer.setVolume(m_lastVolume);
-    m_pVolumeSlider->setValue(m_lastVolume);
-    m_pVolumeLevelLabel->setText(QString::number(m_lastVolume));
+    m_pVolumeSlider->setValue(m_vlcPlayer.volume());
+    m_pVolumeLevelLabel->setText(QString::number(m_vlcPlayer.volume()));
 }
 
-void VlcWidget::onLoadBtnClicked()
+void MainWindow::onLocalFileTriggered()
 {
-    QString file = QFileDialog::getOpenFileName(this, tr("Open file"),
+    QString file = QFileDialog::getOpenFileName(this,
+                                                QStringLiteral("打开文件"),
                                                 QDir::homePath(),
-                                                tr("Multimedia files(*)"));
+                                                QStringLiteral("多媒体文件(*)"));
     if (!file.isEmpty()) {
         m_pPathLabel->setText(file);
         QString localFile = file;
@@ -125,17 +148,29 @@ void VlcWidget::onLoadBtnClicked()
     }
 }
 
-void VlcWidget::onPlayBtnClicked()
+void MainWindow::onNetworkTriggered()
+{
+    QString url = QInputDialog::getText(this,
+                                        QStringLiteral("打开 URL"),
+                                        QStringLiteral("请输入你想要播放的 URL："));
+    if (!url.isEmpty()) {
+        m_pPathLabel->setText(url);
+        m_vlcPlayer.openMedia(url.toUtf8().data(), false);
+        m_vlcPlayer.play();
+    }
+}
+
+void MainWindow::onPlayBtnClicked()
 {
     m_vlcPlayer.play();
 }
 
-void VlcWidget::onPauseBtnClicked()
+void MainWindow::onPauseBtnClicked()
 {
     m_vlcPlayer.pause();
 }
 
-void VlcWidget::onStopBtnClicked()
+void MainWindow::onStopBtnClicked()
 {
     m_vlcPlayer.stop();
     m_length = 0;
@@ -147,7 +182,7 @@ void VlcWidget::onStopBtnClicked()
     m_pMediaPositionLabel->setText(length);
 }
 
-void VlcWidget::onMuteBtnClicked()
+void MainWindow::onMuteBtnClicked()
 {
     // 该接口也可以设置静音
     // m_vlcPlayer.setMute(true);
@@ -162,7 +197,7 @@ void VlcWidget::onMuteBtnClicked()
     }
 }
 
-void VlcWidget::onVolumeChanged(int value)
+void MainWindow::onVolumeChanged(int value)
 {
     m_vlcPlayer.setVolume(value);
     m_pVolumeLevelLabel->setText(QString::number(value));
@@ -176,20 +211,20 @@ void VlcWidget::onVolumeChanged(int value)
 }
 
 // 最后一次释放时的声音大小
-void VlcWidget::onVolumeSliderReleased()
+void MainWindow::onVolumeSliderReleased()
 {
     int volume = m_pVolumeSlider->value();
     if (volume > 0)
         m_lastVolume = volume;
 }
 
-void VlcWidget::onMediaChanged()
+void MainWindow::onMediaChanged()
 {
     int value = m_pMediaSlider->value();
     m_vlcPlayer.setTime(m_length/100*value);
 }
 
-void VlcWidget::onTimeChanged(int position, int length)
+void MainWindow::onTimeChanged(int position, int length)
 {
     m_length = length;
 

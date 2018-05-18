@@ -1,25 +1,26 @@
-﻿#ifndef VLC_WIDGET_H
-#define VLC_WIDGET_H
+﻿#ifndef MAIN_WINDOW_H
+#define MAIN_WINDOW_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include "vlc_player.h"
 
-class QGroupBox;
 class QPushButton;
-class QSlider;
 class QLabel;
+class QSlider;
 
-class VlcWidget : public QWidget
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    VlcWidget(QWidget* parent = Q_NULLPTR);
-    ~VlcWidget();
+    explicit MainWindow(QWidget* parent = Q_NULLPTR);
+    ~MainWindow();
 
 private Q_SLOTS:
     // 打开文件
-    void onLoadBtnClicked();
+    void onLocalFileTriggered();
+    // 打开文件
+    void onNetworkTriggered();
     // 播放
     void onPlayBtnClicked();
     // 暂停
@@ -38,7 +39,8 @@ private Q_SLOTS:
 
 private:
     // 初始化 UI
-    void initUI();
+    void initMenuBar();
+    void initCentralWidget();
     // 初始化设置
     void initSettings();
 
@@ -49,8 +51,6 @@ private:
     int m_lastVolume;
 
     // 基本部件
-    QGroupBox *m_pControlGroup;
-    QPushButton *m_pOpenButton;
     QPushButton *m_pPlayButton;
     QPushButton *m_pPauseButton;
     QPushButton *m_pStopButton;
@@ -63,5 +63,5 @@ private:
     QSlider *m_pVolumeSlider;
 };
 
-#endif // VLC_WIDGET_H
+#endif // MAIN_WINDOW_H
 
