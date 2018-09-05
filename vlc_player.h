@@ -1,4 +1,4 @@
-﻿#ifndef VLC_PLAYER_H
+#ifndef VLC_PLAYER_H
 #define VLC_PLAYER_H
 
 // 避免 ssize_t 引发的错误（VS2010 及更高版本会出现）
@@ -67,6 +67,7 @@ private:
     int64_t time();
 
 private:
+    Q_DECLARE_PRIVATE(VlcPlayer)
     VlcPlayerPrivate* d_ptr;
 };
 

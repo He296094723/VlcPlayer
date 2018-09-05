@@ -1,4 +1,4 @@
-﻿#include "vlc_player.h"
+#include "vlc_player.h"
 #include <QtDebug>
 
 // VLC 类型定义
@@ -171,72 +171,86 @@ static void handleVLCEvents(const VLCEvent* pEvt, void* pUserData)
 VlcPlayer::VlcPlayer()
     : d_ptr(new VlcPlayerPrivate())
 {
-    d_ptr->setEventHandler(&handleVLCEvents, this);
+    Q_D(VlcPlayer);
+    d->setEventHandler(&handleVLCEvents, this);
 }
 
 VlcPlayer::~VlcPlayer()
 {
-    delete d_ptr;
+    Q_D(VlcPlayer);
+    delete d;
 }
 
 void VlcPlayer::setOutputWindow(void* pHwnd)
 {
-    d_ptr->setOutputWindow(pHwnd);
+    Q_D(VlcPlayer);
+    d->setOutputWindow(pHwnd);
 }
 
 void VlcPlayer::play()
 {
-    d_ptr->play();
+    Q_D(VlcPlayer);
+    d->play();
 }
 
 void VlcPlayer::pause()
 {
-    d_ptr->pause();
+    Q_D(VlcPlayer);
+    d->pause();
 }
 
 void VlcPlayer::stop()
 {
-    d_ptr->stop();
+    Q_D(VlcPlayer);
+    d->stop();
 }
 
 int64_t VlcPlayer::length()
 {
-    return d_ptr->length();
+    Q_D(VlcPlayer);
+    return d->length();
 }
 
 int64_t VlcPlayer::time()
 {
-    return d_ptr->time();
+    Q_D(VlcPlayer);
+    return d->time();
 }
 
 void VlcPlayer::setTime(int64_t newTime)
 {
-    d_ptr->setTime(newTime);
+    Q_D(VlcPlayer);
+    d->setTime(newTime);
 }
 
 void VlcPlayer::setMute(bool mute)
 {
-    d_ptr->setMute(mute);
+    Q_D(VlcPlayer);
+    d->setMute(mute);
 }
 
 bool VlcPlayer::mute()
 {
-    return d_ptr->mute();
+    Q_D(VlcPlayer);
+    return d->mute();
 }
 
 int VlcPlayer::volume()
 {
-    return d_ptr->volume();
+    Q_D(VlcPlayer);
+    return d->volume();
 }
 
 void VlcPlayer::setVolume(int volume)
 {
-    d_ptr->setVolume(volume);
+    Q_D(VlcPlayer);
+    d->setVolume(volume);
 }
 
 void VlcPlayer::openMedia(const char* pMediaPathName, bool localFile)
 {
-    d_ptr->openMedia(pMediaPathName, localFile);
+    Q_D(VlcPlayer);
+    d->openMedia(pMediaPathName, localFile);
 }
 
 void VlcPlayer::updatePosition()
