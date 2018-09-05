@@ -1,4 +1,4 @@
-#include "vlc_player.h"
+﻿#include "vlc_player.h"
 #include <QtDebug>
 
 // VLC 类型定义
@@ -14,7 +14,7 @@ public:
 
     void setOutputWindow(void* pHwnd);
     void setEventHandler(VLCEventHandler event, void* pUserData);
-    void openMedia(const char* pMediaPathName, bool localFile = true);
+    void openMedia(const QString &url, bool localFile = true);
     void play();
     void pause();
     void stop();
@@ -80,12 +80,12 @@ void VlcPlayerPrivate::setEventHandler(VLCEventHandler event, void* pUserData)
 }
 
 // 加载一个新项
-void VlcPlayerPrivate::openMedia(const char* pMediaPathName, bool localFile)
+void VlcPlayerPrivate::openMedia(const QString &url, bool localFile)
 {
     if (localFile) {
-        m_pMedia = libvlc_media_new_path(m_pVlcInstance, pMediaPathName);
+        m_pMedia = libvlc_media_new_path(m_pVlcInstance, url.toUtf8().data());
     } else {
-        m_pMedia = libvlc_media_new_location(m_pVlcInstance, pMediaPathName);
+        m_pMedia = libvlc_media_new_location(m_pVlcInstance, url.toUtf8().data());
     }
 
     libvlc_media_player_set_media(m_pMediaPlayer, m_pMedia);
@@ -251,7 +251,7 @@ void VlcPlayer::setVolume(int volume)
 void VlcPlayer::openMedia(const QString &url, bool localFile)
 {
     Q_D(VlcPlayer);
-    d->openMedia(url.toUtf8().data(), localFile);
+    d->openMedia(url, localFile);
 }
 
 void VlcPlayer::updatePosition()
