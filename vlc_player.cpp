@@ -64,13 +64,13 @@ VlcPlayerPrivate::~VlcPlayerPrivate()
 }
 
 // 设置输出窗口
-void VlcPlayerPrivate ::setOutputWindow(void* pHwnd)
+void VlcPlayerPrivate::setOutputWindow(void* pHwnd)
 {
     libvlc_media_player_set_hwnd(m_pMediaPlayer, pHwnd);
 }
 
 // 设置事件处理程序
-void VlcPlayerPrivate ::setEventHandler(VLCEventHandler event, void* pUserData)
+void VlcPlayerPrivate::setEventHandler(VLCEventHandler event, void* pUserData)
 {
     m_eventHandler = event;
     libvlc_event_attach(m_pEventManager,
@@ -80,18 +80,19 @@ void VlcPlayerPrivate ::setEventHandler(VLCEventHandler event, void* pUserData)
 }
 
 // 加载一个新项
-void VlcPlayerPrivate ::openMedia(const char* pMediaPathName, bool localFile)
+void VlcPlayerPrivate::openMedia(const char* pMediaPathName, bool localFile)
 {
-    if (localFile)
+    if (localFile) {
         m_pMedia = libvlc_media_new_path(m_pVlcInstance, pMediaPathName);
-    else
+    } else {
         m_pMedia = libvlc_media_new_location(m_pVlcInstance, pMediaPathName);
+    }
 
     libvlc_media_player_set_media(m_pMediaPlayer, m_pMedia);
 }
 
 // 播放 media player
-void VlcPlayerPrivate ::play()
+void VlcPlayerPrivate::play()
 {
     libvlc_media_player_play(m_pMediaPlayer);
 }
@@ -247,10 +248,10 @@ void VlcPlayer::setVolume(int volume)
     d->setVolume(volume);
 }
 
-void VlcPlayer::openMedia(const char* pMediaPathName, bool localFile)
+void VlcPlayer::openMedia(const QString &url, bool localFile)
 {
     Q_D(VlcPlayer);
-    d->openMedia(pMediaPathName, localFile);
+    d->openMedia(url.toUtf8().data(), localFile);
 }
 
 void VlcPlayer::updatePosition()

@@ -143,7 +143,7 @@ void MainWindow::onLocalFileTriggered()
         m_pPathLabel->setText(file);
         QString localFile = file;
         localFile = QDir::toNativeSeparators(localFile);
-        m_vlcPlayer.openMedia(localFile.toUtf8().data());
+        m_vlcPlayer.openMedia(localFile);
         m_vlcPlayer.play();
     }
 }
@@ -155,7 +155,7 @@ void MainWindow::onNetworkTriggered()
                                         QStringLiteral("请输入你想要播放的 URL："));
     if (!url.isEmpty()) {
         m_pPathLabel->setText(url);
-        m_vlcPlayer.openMedia(url.toUtf8().data(), false);
+        m_vlcPlayer.openMedia(url, false);
         m_vlcPlayer.play();
     }
 }
@@ -186,7 +186,6 @@ void MainWindow::onMuteBtnClicked()
 {
     // 该接口也可以设置静音
     // m_vlcPlayer.setMute(true);
-
     int volume = m_vlcPlayer.volume();
 
     // 若有声音，设置为静音；否则，还原之前的音量

@@ -28,7 +28,7 @@ public:
     void setOutputWindow(void* pHwnd);
 
     // 打开一个媒体文件
-    void openMedia(const char* pMediaPathName, bool localFile = true);
+    void openMedia(const QString &url, bool localFile = true);
 
     // 设置媒体的新位置（单位：毫秒）
     void setTime(int64_t newTime);
